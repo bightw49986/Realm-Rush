@@ -1,0 +1,24 @@
+newmtl Red
+Kd 0.9622641 0.03177289 0.03177289
+d 1
+
+newmtl Arrow
+Kd 0.490566 0.490566 0.490566
+d 1
+
+newmtl LowPoly_-_TreeTrunk
+Kd 0.4191176 0.2952102 0.2496215
+d 1
+
+newmtl Default-Material
+Kd 1 1 1
+d 1
+
+newmtl Wooden
+Kd 0.6886792 0.561905 0.3086062
+d 1
+
+newmtl LowPoly_-_Wood
+Kd 0.8161765 0.4767926 0.2160467
+d 1
+
