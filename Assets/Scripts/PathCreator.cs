@@ -6,6 +6,9 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class PathCreator : MonoBehaviour 
 {
+    StageController stageController;
+
+    [Header("PathFinding")]
     public MyGrid StartPoint,EndPoint;
     Dictionary<Vector2, MyGrid> BFSWayPoints = new Dictionary<Vector2, MyGrid>();
     Queue<MyGrid> queue = new Queue<MyGrid>(); 
@@ -20,19 +23,37 @@ public class PathCreator : MonoBehaviour
     MyGrid searchCenter;
     List<MyGrid> Path = new List<MyGrid>();
 
-    private void Start()
+    void Awake()
     {
-        
+        stageController = FindObjectOfType<StageController>();
     }
+
+    void Start()
+    {
+        ClearPath();
+        stageController.StageChanged += OnStageChanged;
+    }
+
+    void OnStageChanged(StageController.Stage stage)
+    {
+        if (Path.Count==0 && stage == StageController.Stage.Defense)
+        {
+            GeneratePath();
+
+        }
+            
+    }
+
 
     public List<MyGrid> GetPath()
     {
         return Path;
     }
 
-    public void ClearPath()
+    void ClearPath()
     {
-        Path = null;
+        if(Path!=null)
+        Path.Clear();
     }
 
     public void GeneratePath()
@@ -40,9 +61,21 @@ public class PathCreator : MonoBehaviour
         LoadBlocks();
         BreadthFirstSearch();
         CreatePath();
+        OnPathGenerated();
     }
 
-    private void CreatePath()
+    public event Action PathGenerated;
+    protected virtual void OnPathGenerated()
+    {
+        if (PathGenerated != null)
+        {
+            PathGenerated();
+            print("Path generated.");
+        }
+    }
+
+
+    void CreatePath()
     {
         Path.Add(EndPoint);
         MyGrid previous = EndPoint.searchFrom;
@@ -55,10 +88,10 @@ public class PathCreator : MonoBehaviour
         Path.Reverse();
     }
 
-    private void BreadthFirstSearch()
+    void BreadthFirstSearch()
     {
         queue.Enqueue(StartPoint);
-        while (queue.Count> 0 && isRunning)
+        while (queue.Count > 0 && isRunning)
         {
             searchCenter = queue.Dequeue();
             searchCenter.isExplored = true;
@@ -66,21 +99,21 @@ public class PathCreator : MonoBehaviour
             ExploreNeighours();
         }
     }
-    private void HaltIfEndFound()
+    void HaltIfEndFound()
     {
         if (searchCenter == EndPoint)
         {
-            isRunning = false;  
+            isRunning = false;
         }
     }
 
-    private void ExploreNeighours()
+    void ExploreNeighours()
     {
         if (!isRunning)
         {
             return;
         }
-        foreach(Vector2Int deriction in directions)
+        foreach (Vector2Int deriction in directions)
         {
             Vector2Int neighbourCoordinates = searchCenter.GetGridPos() + deriction;
             if (BFSWayPoints.ContainsKey(neighbourCoordinates))
@@ -90,7 +123,7 @@ public class PathCreator : MonoBehaviour
         }
     }
 
-    private void QueNewNeighbours(Vector2Int neighbourCoordinates)
+    void QueNewNeighbours(Vector2Int neighbourCoordinates)
     {
         var neighbour = BFSWayPoints[neighbourCoordinates];
         if (!neighbour.isExplored && !queue.Contains(neighbour))
@@ -100,7 +133,7 @@ public class PathCreator : MonoBehaviour
         }
     }
 
-    private void LoadBlocks()
+    void LoadBlocks()
     {
         MyGrid[] blocks = FindObjectsOfType<MyGrid>();
         foreach (MyGrid waypoint in blocks)

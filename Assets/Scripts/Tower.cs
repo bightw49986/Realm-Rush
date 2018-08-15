@@ -5,23 +5,24 @@ using UnityEngine;
 
 public class Tower : MonoBehaviour 
 {
-    StageController stageController;
-	// Use this for initialization
-	void Start () 
+    Player player;
+
+    void Awake()
     {
-        stageController = FindObjectOfType<StageController>();	
-	}
-    private void OnMouseDown()
+        player = FindObjectOfType<Player>();
+    }
+
+    void OnMouseDown()
     {
         DestroyTower();
 }
 
-    private void DestroyTower()
+    void DestroyTower()
     {
         var grid = transform.GetComponentInParent<MyGrid>();
         grid.passable = true;
-        grid.SetMaterial();
-        stageController.TowerCount += 1;
+        grid.SetMaterial(StageController.Stage.Build);
+        player.Tower += 1;
         Destroy(gameObject);
     }
 }

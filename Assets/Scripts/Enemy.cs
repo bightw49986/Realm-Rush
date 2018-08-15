@@ -5,34 +5,48 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    [Header("Hp")]
+    PathCreator pathCreator;
+
+    [Header("Properties")]
     [SerializeField] int MaxHealth = 3;
     [SerializeField] int Health;
-    public bool isAlive = true;
-
-    [Header("PathFollowing")]
-    PathCreator pathCreator;
-    float startTime;
-    float distanceToNext;
-    float timeCost;
-    Vector3 startPos;
-    Vector3 nextPos;
-
+    [SerializeField] public int Damage = 1;
     [SerializeField] float MovementSpeed = 10f;
+    [SerializeField] public bool isAlive = true;
 
-    private void Start()
+    void Awake()
+    {
+        pathCreator = FindObjectOfType<PathCreator>();
+    }
+
+    void Start()
     {
         isAlive = true;
         Health = MaxHealth;
-        pathCreator = FindObjectOfType<PathCreator>();
         var path = pathCreator.GetPath();
         StartCoroutine(FollowPath(path));
     }
 
-    private void OnParticleCollision(GameObject other)
+    void OnParticleCollision(GameObject other)
     {
-		var HitType = other.GetComponent<Arrow>();
-		TakeDamage(HitType.damage);
+        var HitType = other.GetComponent<Arrow>();
+        TakeDamage(HitType.damage);
+    }
+
+    public event Action<Enemy> EnemyPassed;
+    public event Action<Enemy> EnemyDied;
+
+    protected virtual void OnEnemyPassed(Enemy enemy)
+    {
+        if (EnemyPassed != null)
+            EnemyPassed(enemy);
+        print(gameObject + " passed goal.");
+    }
+    protected virtual void OnEnemyDied(Enemy enemy)
+    {
+        if (EnemyDied != null)
+            EnemyDied(enemy);
+        print(gameObject + " is dead.");
     }
 
     public void TakeDamage(int damage)
@@ -52,23 +66,28 @@ public class Enemy : MonoBehaviour
         MovementSpeed = newSpeed;
     }
 
-    private void Die()
+    void Die()
     {
-        print(gameObject + "is dead.");
         isAlive = false;
+        OnEnemyDied(this);
+        Destroy(this);
         //todo deathFX
-        Destroy(gameObject, 0.3f);
     }
 
     IEnumerator FollowPath(List<MyGrid> path)
-    {
+    {   
+        float startTime;
+        float distanceToNext;
+        Vector3 startPos;
+        Vector3 nextPos;
+
+        if (Time.timeScale < Mathf.Epsilon) yield return null;
         for (var i = 0; i < path.Count; i++)
         {
             if (path[i] != pathCreator.EndPoint)
             {
                 transform.LookAt(path[i + 1].transform);
                 startTime = Time.time;
-                //print("Moving to next waypoint..." + path[i+1]);
                 startPos = path[i].transform.position;
                 transform.position = startPos;
                 nextPos = path[i + 1].transform.position;
@@ -84,11 +103,11 @@ public class Enemy : MonoBehaviour
                     }
                     yield return null;
                 }
-                //print("Reached a waypoint." + path[i + 1]);
+
             }
         }
-        //print("Reached goal. Selfdestroying...");
-        Destroy(gameObject, 0.3f);
+        OnEnemyPassed(this);
+        Destroy(this);
     }
 
 }

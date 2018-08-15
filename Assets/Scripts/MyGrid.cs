@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class MyGrid : MonoBehaviour 
 {
+    Player player;
     StageController stageController;
+
+    [Header("Properties")]
     const int GridSize = 10;
     Vector2Int gridPos;
     MeshRenderer topMeshRenderer;
-
-    [Header("Properties")]
     public bool passable = true;
     public bool isStartOrEnd;
     public bool isExplored;
@@ -19,93 +20,95 @@ public class MyGrid : MonoBehaviour
     [SerializeField] Material Normal;
     [SerializeField] Material TowerPlace;
     [SerializeField] Material Forbidden;
-    [SerializeField] bool DisableMeshInRunTime;
 
 
-    private void Start()
+
+    void Awake()
     {
         stageController = FindObjectOfType<StageController>();
+        player = FindObjectOfType<Player>();
         topMeshRenderer = transform.Find("Top").GetComponent<MeshRenderer>();
-        SetMaterial();
-        if (!isStartOrEnd)
-        topMeshRenderer.enabled = false;
     }
 
-    private void OnMouseOver()
+    void Start()
     {
-        if (!isStartOrEnd)
-        ShowGridImage(true);
-
-    }
-
-    private void OnMouseExit()
-    {
-        if (!isStartOrEnd)
-        ShowGridImage(false);
-    }
-
-    private void OnMouseDown()
-    {
-        if(stageController.isBuildingMode)
+        
+        if(!isStartOrEnd)
         {
-            if(!passable||isStartOrEnd)
+            SetMaterial(stageController.CurrentStage);
+            stageController.StageChanged += SetMaterial;
+            topMeshRenderer.enabled = false;
+        }
+    }
+
+    void OnMouseOver()
+    {
+        if (!isStartOrEnd)
+            topMeshRenderer.enabled = true;
+
+    }
+
+    void OnMouseExit()
+    {
+        if (!isStartOrEnd)
+            topMeshRenderer.enabled = false;
+    }
+
+    void OnMouseDown()
+    {
+        if (stageController.CurrentStage == StageController.Stage.Build)
+        {
+            if (!passable||isStartOrEnd)
             {
                 print("Invalid grid.");
             }
             else
             {
-                if (stageController.TowerCount > 0)
+                if (player.Tower > 0)
                 {
                     PlaceTower();
                     return;
                 }
                 print("Out of tower,please delete one first(left click on tower)");
             }
-
         }
     }
 
-    private void PlaceTower()
+    void PlaceTower()
     {
         print("Placed a tower.");
-        Instantiate(stageController.TowerPrefab, transform.position, Quaternion.identity,transform.Find("Top"));
-        stageController.TowerCount -= 1;
+        Instantiate(player.TowerPrefab, transform.position, Quaternion.identity, transform.Find("Top"));
+        player.Tower -= 1;
         passable = false;
-        SetMaterial();
+        SetMaterial(stageController.CurrentStage);
     }
 
-    private void ShowGridImage(bool b)
+    public void SetMaterial(StageController.Stage stage)
     {
-        topMeshRenderer.enabled = b;
-    }
-
-    public void SetMaterial()
-    {
-        if (!isStartOrEnd)
+        switch(stage)
         {
-            if(stageController.isBuildingMode)
-            {
-                if(passable)
+            case (StageController.Stage.Build):
                 {
-                    topMeshRenderer.material = TowerPlace;
+                    if (passable&& !isStartOrEnd )
+                    {
+                        topMeshRenderer.material = TowerPlace;
+                        return;
+                    }
+                        topMeshRenderer.material = Forbidden;
+                        return;
                 }
-                else
+            default:
                 {
+                    if(passable && !isStartOrEnd)
+                    {
+                        topMeshRenderer.material = Normal;
+                        return;
+                    }
                     topMeshRenderer.material = Forbidden;
+                    return;
                 }
-            }
-            else
-            {
-                if(passable)
-                {
-                    topMeshRenderer.material = Normal;
-                }
-                else
-                {
-                    topMeshRenderer.material = Forbidden;
-                }
-            }
         }
+
     }
 
     public int GetGridSize()

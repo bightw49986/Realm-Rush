@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,60 +7,74 @@ public class Arrow : MonoBehaviour
 {
     ParticleSystem particle;
     ParticleSystem.MainModule main;
-    Transform Tower;
+    EnemySpawner enemySpawner;
     public readonly int damage = 1;
     [SerializeField] float range = 30;
-    Queue<Enemy> targets;
-    Enemy[] enemies;
+    Queue<GameObject> targets = new Queue<GameObject>();
+    List<GameObject> enemies = new List<GameObject>();
 
-    private void Start()
+
+    void Awake()
     {
-        targets = new Queue<Enemy>();
-        Tower = transform.parent;
         particle = GetComponent<ParticleSystem>();
+        enemySpawner = FindObjectOfType<EnemySpawner>();
+    }
+    void Start()
+    {
+        enemySpawner.EnemySpawned += OnEnemySpawned;
         main = particle.main;
     }
 
-    private void Update()
+    void OnEnemySpawned(GameObject enemy)
     {
-        enemies = FindObjectsOfType<Enemy>();
+        if(enemies.Contains(enemy)==false)
+        enemies.Add(enemy);
+    }
+
+    void Update()
+    {
         SortTargetQueue();
         AimFirstTarget();
 
     }
 
-    private void SortTargetQueue()
+    void SortTargetQueue()
     {
-        foreach (Enemy enemy in enemies)
+        if (enemies.Count == 0 || enemies == null) return;
+        foreach (GameObject enemy in enemies)
         {
+            if (enemy.activeSelf==false || enemy == null)
+            {
+                enemies.Remove(enemy);
+                return;
+            }
             var enemyRange = Vector3.Distance(transform.parent.position, enemy.transform.position);
-            if (!targets.Contains(enemy)&& enemyRange <= range)
+            if (!targets.Contains(enemy) && enemyRange <= range)
             {
                 targets.Enqueue(enemy);
-                print("Target in range, enqueue target.");
+
             }
-            else if (targets.Contains(enemy)&& enemyRange>range)
+            else if (targets.Contains(enemy) && enemyRange > range)
             {
                 targets.Dequeue();
-                print("Target offsight, dequeue.");
+
             }
         }
     }
 
-    private void AimFirstTarget()
+    void AimFirstTarget()
     {
-        if (targets.Count >0)
+        if (targets.Count > 0)
         {
-            Enemy firstTarget = targets.Peek();
-            if(firstTarget.isAlive==false || firstTarget==null)
+            GameObject firstTarget = targets.Peek();
+            if ( firstTarget.activeSelf == false ||  firstTarget.GetComponent<Enemy>().isAlive== false)
             {
                 targets.Dequeue();
-                print("Target down, dequeue.");
                 return;
             }
             var mark = firstTarget.gameObject.transform.GetChild(10);
             transform.forward = mark.transform.position - transform.parent.position;
-            if(particle.isStopped)
+            if (particle.isStopped)
             {
                 particle.Play();
             }
@@ -71,7 +86,7 @@ public class Arrow : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(transform.position, range);
     }
