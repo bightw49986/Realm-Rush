@@ -30,7 +30,7 @@ public class EnemySpawner : MonoBehaviour
     void Start()
     {
         pathCreator.PathGenerated += StartSpawningEnemies;
-        objectPool.InstantiateGameObjectData(10, PoolingGameObjectData.m_eType.snowman, EnemyPrefab);
+        objectPool.InstantiateGameObjectData(10, PoolingGameObjectData.PoolKey.snowman, EnemyPrefab);
     }
 
     void StartSpawningEnemies()
@@ -52,8 +52,7 @@ public class EnemySpawner : MonoBehaviour
 
     void InstantiateEnemies()
     {
-        GameObject enemy =  objectPool.AccessGameObjectFromPool(PoolingGameObjectData.m_eType.snowman,true);
-        //GameObject enemy = Instantiate(EnemyPrefab, transform.position, Quaternion.identity, SpawnAtRunTime);
+        GameObject enemy =  objectPool.AccessGameObjectFromPool(PoolingGameObjectData.PoolKey.snowman, EnemyPrefab, true);
         enemy.transform.position = transform.position;
         enemy.AddComponent<Enemy>();
         enemy.GetComponent<Enemy>().SetSpeed(MovementSpeed);
@@ -75,11 +74,11 @@ public class EnemySpawner : MonoBehaviour
             EnemySpawned(enemy);
         enemy.GetComponent<Enemy>().EnemyPassed += delegate 
         {
-            objectPool.ReturnGameObjectToPool(enemy, PoolingGameObjectData.m_eType.snowman);
+            objectPool.ReturnGameObjectToPool(enemy, PoolingGameObjectData.PoolKey.snowman);
         };
         enemy.GetComponent<Enemy>().EnemyDied += delegate 
         {
-            objectPool.ReturnGameObjectToPool(enemy, PoolingGameObjectData.m_eType.snowman);
+            objectPool.ReturnGameObjectToPool(enemy, PoolingGameObjectData.PoolKey.snowman);
         };
     }
     protected virtual void OnSpawningFinished()

@@ -6,7 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class StageController : SceneManagement
 {
-    Scene currentScene;
+    public Scene currentScene;
+    public string nextScene;
 
     EnemySpawner enemySpawner;
     int _enemiesToKill;
@@ -30,11 +31,10 @@ public class StageController : SceneManagement
             DontDestroyOnLoad(this.gameObject);
         }
         player = FindObjectOfType<Player>();
-        OnSceneLoaded(SceneManager.GetActiveScene());
-
     }
     void Start()
     {
+        OnSceneLoaded(SceneManager.GetActiveScene());
         SceneLoaded += OnSceneLoaded;
         SceneReLoaded += OnSceneReLoaded;
         player.Died += OnPlayerDied;
@@ -44,13 +44,13 @@ public class StageController : SceneManagement
     {
         TransStageTo(Stage.Die);
         print("Player died.");
-        Time.timeScale = 0;
         //retry or back to main menu
     }
 
     protected override void OnSceneLoaded(Scene scene)
     {
         currentScene = scene;
+        nextScene = "Level " + (int.Parse((currentScene.name.Split(' '))[1]) + 1).ToString();
         enemySpawner = FindObjectOfType<EnemySpawner>();
         if (enemySpawner == null) return;
         else
@@ -65,8 +65,8 @@ public class StageController : SceneManagement
         }
         PlayerStates = player.GetPlayerStates();
         player.isAlive = true;
-        TransStageTo(Stage.Build);
         print("Detected scene loaded,trans to Build stage.");
+        TransStageTo(Stage.Build);
     }
 
     protected override void OnSceneReLoaded(Scene scene)
@@ -109,7 +109,6 @@ public class StageController : SceneManagement
         if (EnemiesToKill <= 0)
         {
             TransStageTo(Stage.Win);
-            Time.timeScale = 0;
             print("Level complete.");
             hasLoaded = false;
             //continue or back to main menu. 
@@ -123,6 +122,7 @@ public class StageController : SceneManagement
         enemyData.EnemyDied += delegate
         {
             EnemiesToKill -= 1;
+            player.EnemyKilled += 1;
         };
         enemyData.EnemyPassed += delegate
         {

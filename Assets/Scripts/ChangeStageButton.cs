@@ -22,7 +22,7 @@ public class ChangeStageButton : MonoBehaviour
 
     void ChangeButton(StageController.Stage stage)
     {
-        print("Detected stage changed,current stage is: " + stage);
+        print("Button detected stage changed,current stage is: " + stage);
         switch (stage)
         {
             case (StageController.Stage.Build):

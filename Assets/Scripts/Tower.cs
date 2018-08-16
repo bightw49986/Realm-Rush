@@ -6,16 +6,20 @@ using UnityEngine;
 public class Tower : MonoBehaviour 
 {
     Player player;
+    StageController stageController;
 
     void Awake()
     {
         player = FindObjectOfType<Player>();
+        stageController = FindObjectOfType<StageController>();
     }
 
     void OnMouseDown()
     {
+        if (stageController.CurrentStage == StageController.Stage.Build) 
         DestroyTower();
-}
+        // todo show tower info.
+    }
 
     void DestroyTower()
     {

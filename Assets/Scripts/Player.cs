@@ -9,7 +9,7 @@ public class Player : MonoBehaviour
     public GameObject TowerPrefab;
     public int HP { get { return m_hp; } set { m_hp = value;OnHPChanged(m_hp); } }
     int m_hp;
-    public int Tower { get; set; }
+    public int Tower { get;set; }
     public int EnemyKilled { get; set; }
     public bool isAlive;
     public bool hasInit;

@@ -9,6 +9,6 @@ public class PoolingGameObjectData
     }
     public bool m_isUsing;
 
-    public enum m_eType {snowman};
+    public enum PoolKey {snowman};
 
 }
