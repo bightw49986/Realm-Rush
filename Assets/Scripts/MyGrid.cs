@@ -74,6 +74,11 @@ public class MyGrid : MonoBehaviour
         }
     }
 
+    void OnDestroy()
+    {
+        stageController.StageChanged -= SetMaterial;
+    }
+
     void PlaceTower()
     {
         print("Placed a tower.");

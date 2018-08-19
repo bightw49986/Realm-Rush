@@ -33,6 +33,11 @@ public class EnemySpawner : MonoBehaviour
         objectPool.InstantiateGameObjectData(10, PoolingGameObjectData.PoolKey.snowman, EnemyPrefab);
     }
 
+    void OnDestroy()
+    {
+        pathCreator.PathGenerated -= StartSpawningEnemies;
+    }
+
     void StartSpawningEnemies()
     {
         StartCoroutine("SpawnEnemies");

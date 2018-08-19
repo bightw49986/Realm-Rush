@@ -25,6 +25,11 @@ public class Arrow : MonoBehaviour
         main = particle.main;
     }
 
+    void OnDestroy()
+    {
+        enemySpawner.EnemySpawned -= OnEnemySpawned;
+    }
+
     void OnEnemySpawned(GameObject enemy)
     {
         if(enemies.Contains(enemy)==false)

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -16,7 +14,9 @@ public class SceneManagement : MonoBehaviour
     protected virtual void OnSceneLoaded(Scene scene)
     {
         if (SceneLoaded != null)
+        {
             SceneLoaded(scene);
+        }
     }
 
     protected virtual void OnSceneReLoaded(Scene scene)
@@ -31,30 +31,21 @@ public class SceneManagement : MonoBehaviour
             SceneUnLoaded(scene);
     }
 
-    void Awake()
+    protected void SubscribeToSceneManager()
     {
-        if (FindObjectsOfType<SceneManagement>().Length > 1)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            DontDestroyOnLoad(this.gameObject);
-        }
         SceneManager.sceneLoaded += SceneLoadedEvent;
         SceneManager.sceneUnloaded += SceneUnLoadedEvent;
     }
+
     void SceneLoadedEvent(Scene scene, LoadSceneMode mode)
     {
         if (hasLoaded == false)
         {
             OnSceneLoaded(scene);
             hasLoaded = true;
+            return;
         }
-        else
-        {
-            OnSceneReLoaded(scene);
-        }
+        OnSceneReLoaded(scene);
     }
 
     void SceneUnLoadedEvent(Scene scene)

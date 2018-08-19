@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 
 public class ObjectPool : MonoBehaviour
 {
@@ -8,30 +8,15 @@ public class ObjectPool : MonoBehaviour
     Vector3 InstanitiatePos;
     Transform InstantiateParent;
 
-    StageController stageController;
-
     void Awake()
     {
         Init();
-        stageController = FindObjectOfType<StageController>();
     }
 
-    void Start()
-    {
-        OnSceneloaded(stageController.currentScene);
-        stageController.SceneLoaded += OnSceneloaded;
-        stageController.SceneUnLoaded += OnSceneUnloaded;
-    }
-
-    void OnSceneloaded(Scene scene)
+    public void UpdateLevelEnemy()
     {
         InstanitiatePos = FindObjectOfType<EnemySpawner>().transform.position;
         InstantiateParent = GameObject.Find("SpawnAtRunTime").transform;
-    }
-
-    void OnSceneUnloaded(Scene scene)
-    {
-        ClearPool();
     }
 
     void Init()
@@ -179,10 +164,9 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    void ClearPool()
+    public void ClearPool()
     {
         m_pool.Clear();
-        m_pool = null;
         Resources.UnloadUnusedAssets();
     }
 

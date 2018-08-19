@@ -20,6 +20,11 @@ public class ChangeStageButton : MonoBehaviour
         stageController.StageChanged += ChangeButton;
     }
 
+    void OnDestroy()
+    {
+        stageController.StageChanged -= ChangeButton;
+    }
+
     void ChangeButton(StageController.Stage stage)
     {
         print("Button detected stage changed,current stage is: " + stage);

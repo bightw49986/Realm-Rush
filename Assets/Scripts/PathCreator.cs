@@ -125,7 +125,7 @@ public class PathCreator : MonoBehaviour
 
     void QueNewNeighbours(Vector2Int neighbourCoordinates)
     {
-        var neighbour = BFSWayPoints[neighbourCoordinates];
+        MyGrid neighbour = BFSWayPoints[neighbourCoordinates];
         if (!neighbour.isExplored && !queue.Contains(neighbour))
         {
             queue.Enqueue(neighbour);

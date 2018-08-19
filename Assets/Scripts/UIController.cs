@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
@@ -23,11 +21,6 @@ public class UIController : MonoBehaviour
 
     void Start () 
     {
-        stageController.SceneLoaded += delegate 
-        {
-            Level.text = "Current Level : " + stageController.currentScene.name;
-            towerAvailible = player.Tower;
-        };
         stageController.StageChanged += OnStageChanged;
 	}
 
@@ -37,6 +30,12 @@ public class UIController : MonoBehaviour
         Tower.text = "Tower : " + player.Tower + " / " + towerAvailible;
         EnemyKilled.text = "Enemy Killed : " + player.EnemyKilled;
 	}
+
+    public void UpdateLevelInfo()
+    {
+        Level.text = "Current Level : " + (int.Parse((stageController.currentScene.name.Split(' '))[1]));
+        towerAvailible = player.Tower;
+    }
 
     void OnStageChanged(StageController.Stage stage)
     {
@@ -53,5 +52,9 @@ public class UIController : MonoBehaviour
             WinLose.rectTransform.localScale = new Vector3(1.7f, 1.7f, 1.7f);
             winLoseScreen.SetTrigger("Level Complete");
         }
+    }
+    void OnDestroy()
+    {
+        stageController.StageChanged -= OnStageChanged;
     }
 }
